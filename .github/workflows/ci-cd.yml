@@ -30,7 +30,10 @@ jobs:
         shell: bash
         env:
           GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
+          REPO_LOWER: ${{ github.repository }}
         run: |
+          # Convert to lowercase
+          REPO_LOWER=${REPO_LOWER,,}
           # Configure git credential store
           git config --global credential.helper store
           echo "https://${GIT_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
@@ -43,9 +46,9 @@ jobs:
           cd gitops
           
           if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s|image: ghcr.io/${{ github.repository }}:.*|image: ghcr.io/${{ github.repository }}:${{ github.sha }}|g" deployment.yaml
+            sed -i '' "s|image: ghcr.io/${{ github.repository }}:.*|image: ghcr.io/${REPO_LOWER}:${{ github.sha }}|g" deployment.yaml
           else
-            sed -i "s|image: ghcr.io/${{ github.repository }}:.*|image: ghcr.io/${{ github.repository }}:${{ github.sha }}|g" deployment.yaml
+            sed -i "s|image: ghcr.io/${{ github.repository }}:.*|image: ghcr.io/${REPO_LOWER}:${{ github.sha }}|g" deployment.yaml
           fi
           
           # Commit changes
